@@ -1,6 +1,6 @@
 import type { Family, WeddingEvent } from "@/data/config";
 import type { ResolvedSide } from "@/lib/side";
-import { googleCalendarUrl, mapUrl } from "@/lib/date";
+import { googleCalendarUrl, mapUrl, splitDate } from "@/lib/date";
 import { Blossom } from "./Blossom";
 import { SectionHeading } from "./SectionHeading";
 
@@ -181,6 +181,7 @@ export function Details({ side, guestName }: Props) {
               <EventCard
                 event={event}
                 eyebrow={parties.length > 1 ? event.title : undefined}
+                featured
               />
             </li>
           ))}
@@ -230,7 +231,17 @@ function FamilyColumn({
  * cắt câu "... cử hành tại" / "... chung vui tại" làm đôi. Chỉ khi một bên có
  * từ hai tiệc trở lên thì mới truyền `eyebrow` vào cho khách phân biệt.
  */
-function EventCard({ event, eyebrow }: { event: WeddingEvent; eyebrow?: string }) {
+function EventCard({
+  event,
+  eyebrow,
+  featured = false,
+}: {
+  event: WeddingEvent;
+  eyebrow?: string;
+  featured?: boolean;
+}) {
+  const date = splitDate(event.datetime);
+
   return (
     <article className="relative overflow-hidden rounded-[1.75rem] border border-blush-dark/45 bg-cream px-5 py-7 shadow-[0_16px_40px_-28px_rgba(156,80,92,0.75)]">
       {/* Cùng ngôn ngữ trang trí với hai tấm thiệp phía trên: khung chỉ chìm
@@ -268,14 +279,23 @@ function EventCard({ event, eyebrow }: { event: WeddingEvent; eyebrow?: string }
           </svg>
         </div>
 
-        <dl className="text-center">
-          <dt className="sr-only">Thời gian</dt>
-          <dd className="lnum font-display text-[1.15rem] leading-tight tracking-[0.06em] text-wine">
-            Vào lúc {event.timeLabel}
-          </dd>
-          <dt className="sr-only">Ngày âm lịch</dt>
-          <dd className="mt-1.5 text-[0.7rem] text-ink-soft italic">({event.lunarLabel})</dd>
-        </dl>
+        {featured ? (
+          <DatePlaque event={event} date={date} />
+        ) : (
+          <dl className="text-center">
+            <dt className="sr-only">Thời gian</dt>
+            <dd className="lnum font-display text-[1.15rem] leading-tight tracking-[0.06em] text-wine">
+              Vào lúc {event.timeLabel}
+            </dd>
+            <dt className="sr-only">Ngày dương lịch</dt>
+            <dd className="lnum mt-1.5 text-[0.82rem] tracking-[0.14em] text-wine/90">
+              <span className="sr-only">{date.longDate}</span>
+              <span aria-hidden>Ngày {date.dateLine}</span>
+            </dd>
+            <dt className="sr-only">Ngày âm lịch</dt>
+            <dd className="mt-1.5 text-[0.7rem] text-ink-soft italic">({event.lunarLabel})</dd>
+          </dl>
+        )}
 
         {event.note ? (
           <p className="mx-auto mt-3 max-w-[19rem] text-center font-script text-lg text-balance text-seal">
@@ -311,6 +331,70 @@ function EventCard({ event, eyebrow }: { event: WeddingEvent; eyebrow?: string }
         </div>
       </div>
     </article>
+  );
+}
+
+/**
+ * Tấm khắc ngày của buổi tiệc. Đây là thứ khách phải nhớ ngang với địa điểm —
+ * nhất là thiệp nhà gái, nơi tiệc đãi hôm trước còn lễ mới là Chủ Nhật — nên
+ * ngày dương lịch được dựng hẳn thành một khối riêng thay cho một dòng chữ
+ * nhỏ: thứ nằm trên, số ngày to đứng giữa hai vạch dọc, tháng và năm đứng hai
+ * bên. Ngày âm lịch vẫn đi kèm ngay dưới để các bác tra theo lịch nhà.
+ *
+ * Phần nhìn để `aria-hidden` và kèm một dòng sr-only đọc trọn câu ngày: tách ô
+ * ra cho đẹp thì trình đọc màn hình sẽ đọc rời rạc "Tháng 11, 29, 2026".
+ */
+function DatePlaque({
+  event,
+  date,
+}: {
+  event: WeddingEvent;
+  date: ReturnType<typeof splitDate>;
+}) {
+  // "11 giờ · Chủ Nhật" -> "11 giờ". Thứ đã đứng riêng một dòng ngay trên rồi.
+  const hour = event.timeLabel.split("·")[0].trim();
+
+  return (
+    <dl className="relative overflow-hidden rounded-2xl border border-blush-dark/55 bg-blush-light/70 px-4 py-5 text-center">
+      {/* Khung chỉ trắng chìm trong mép — cùng ngôn ngữ với tấm thiệp bọc ngoài,
+          để khối ngày trông như được khắc lên giấy chứ không phải dán đè lên. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-[5px] rounded-[0.95rem] border border-white/70"
+      />
+
+      <dt className="sr-only">Ngày dương lịch</dt>
+      <dd className="sr-only">{date.longDate}</dd>
+
+      <div aria-hidden className="relative">
+        <p className="flex items-center justify-center gap-2 text-[0.58rem] tracking-[0.3em] text-seal uppercase">
+          <span className="h-px w-5 bg-gradient-to-r from-transparent to-blush-dark" />
+          {date.weekday}
+          <span className="h-px w-5 bg-gradient-to-l from-transparent to-blush-dark" />
+        </p>
+
+        {/* Tháng | NGÀY | năm — số ngày in to nhất, hai vạch dọc kẹp hai bên
+            đúng kiểu con dấu ngày trên thiệp giấy. Hai cột hai bên chia đều
+            nên số ngày luôn nằm chính giữa dù "Tháng 11" dài hơn "2026". */}
+        <div className="mt-2.5 grid grid-cols-[1fr_auto_1fr] items-center">
+          <p className="text-[0.63rem] tracking-[0.22em] text-ink-soft uppercase">{date.month}</p>
+          <p className="lnum border-x border-blush-dark/70 px-4 font-display text-[clamp(2.7rem,13vw,3.5rem)] leading-none font-medium text-wine sm:px-5">
+            {date.day}
+          </p>
+          <p className="lnum text-[0.63rem] tracking-[0.22em] text-ink-soft uppercase">
+            {date.year}
+          </p>
+        </div>
+      </div>
+
+      <dt className="sr-only">Thời gian</dt>
+      <dd className="lnum relative mt-3.5 font-display text-[1.12rem] leading-tight tracking-[0.06em] text-wine">
+        Vào lúc {hour}
+      </dd>
+
+      <dt className="sr-only">Ngày âm lịch</dt>
+      <dd className="relative mt-1.5 text-[0.7rem] text-ink-soft italic">({event.lunarLabel})</dd>
+    </dl>
   );
 }
 

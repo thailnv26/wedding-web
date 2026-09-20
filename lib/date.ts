@@ -68,5 +68,10 @@ export function splitDate(iso: string) {
     time: `${p.hour}:${p.minute}`,
     /** Dòng ngày kiểu "29 . 11 . 2026" in trên phong bì và chân trang. */
     dateLine: `${p.day} . ${p.month} . ${p.year}`,
+    /**
+     * Câu ngày đọc trọn vẹn: "Chủ Nhật, ngày 29 tháng 11 năm 2026".
+     * Dùng cho trình đọc màn hình ở những chỗ ngày bị tách ô cho đẹp.
+     */
+    longDate: `${WEEKDAY_VI[p.weekday] ?? p.weekday}, ngày ${Number(p.day)} tháng ${Number(p.month)} năm ${p.year}`,
   };
 }
