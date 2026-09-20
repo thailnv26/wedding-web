@@ -1,26 +1,336 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* Bảng màu thiệp — tông hồng phấn / kem */
+  --color-cream: #fdf7f4;
+  --color-cream-deep: #f8ece6;
+  --color-blush: #f3d3d8;
+  --color-blush-light: #fbe9ec;
+  --color-blush-dark: #e9bcc4;
+  --color-petal: #e8a9b4;
+  --color-seal: #b75e6a;
+  --color-wine: #9c505c;
+  --color-ink: #6e5257;
+  --color-ink-soft: #8c7276;
+
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-fall: fall linear infinite;
+  --animate-pulse-soft: pulse-soft 2.4s ease-in-out infinite;
 }
 
+/*
+ * Font phải khai bằng `@theme inline` — biến --font-cormorant/... nằm trên <body>,
+ * nếu để trong @theme thường thì Tailwind định nghĩa ở :root và var() không resolve được.
+ */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-cormorant), "Times New Roman", serif;
+  --font-script: var(--font-dancing), "Segoe Script", cursive;
+  --font-body: var(--font-bevietnam), system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes fall {
+  0% { transform: translate3d(0, -10vh, 0) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.9; }
+  90% { opacity: 0.6; }
+  100% { transform: translate3d(var(--drift, 20px), 110vh, 0) rotate(420deg); opacity: 0; }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.06); opacity: 0.85; }
+}
+
+html {
+  scroll-behavior: smooth;
+  /* chừa chỗ cho thanh điều hướng dưới cùng khi cuộn tới section */
+  scroll-padding-bottom: 6rem;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-bevietnam), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Khoá cuộn khi phong bì chưa mở */
+body[data-locked="true"] {
+  overflow: hidden;
+  height: 100dvh;
+}
+
+/*
+ * ============================================================
+ *  HIỆU ỨNG CUỘN TỚI ĐÂU HIỆN TỚI ĐÓ
+ * ============================================================
+ *
+ * Ba lớp chồng lên nhau, tất cả đều do lib/useReveal.ts bật:
+ *
+ *  1. `.reveal` -> `data-shown`  : cả khối trồi lên và hiện ra (một lần).
+ *  2. `.photo-sheen` bên trong   : mặt ảnh "rửa" từ lớp kem mờ ra ảnh thật,
+ *                                  kèm một vệt sáng quét ngang (một lần).
+ *  3. `data-inview` trên ảnh     : ảnh nào đang nằm trong màn hình thì zoom -
+ *                                  trôi chậm liên tục (Ken Burns), ra khỏi
+ *                                  màn hình thì dừng cho đỡ tốn pin.
+ *
+ * Độ trễ xếp lớp đi qua biến `--reveal-delay` (useReveal đặt lúc phần tử lọt
+ * vào khung hình) chứ không phải `transition-delay` trực tiếp: biến kế thừa
+ * xuống con, nên vệt sáng và lớp kem của ảnh trễ đúng bằng khung bọc nó.
+ *
+ * Chỉ động vào `opacity` / `transform` / `translate` để trình duyệt chạy trên
+ * compositor — điện thoại yếu vẫn mượt.
+ *
+ * Lưu ý: đừng gắn .reveal thẳng lên phần tử đã có transition của Tailwind
+ * (ảnh polaroid, nút ảnh trong album). File này nằm ngoài @layer nên sẽ đè
+ * mất transition hover của chúng — hãy bọc một thẻ div .reveal bên ngoài.
+ */
+.reveal {
+  opacity: 0;
+  transform: translateY(38px);
+  transition:
+    opacity 0.7s ease-out var(--reveal-delay, 0ms),
+    transform 1.1s cubic-bezier(0.19, 1, 0.22, 1) var(--reveal-delay, 0ms);
+}
+
+/*
+ * Biến thể cho ảnh: tấm hình được thả xuống mặt bàn — trồi lên, phóng ra và
+ * xoay về đúng độ nghiêng của nó. Xoay ở lớp bọc chứ không ở khung ảnh: khung
+ * đã dùng property `rotate` cho độ nghiêng cố định, hai property cộng dồn
+ * được nên không cái nào nuốt cái nào.
+ */
+.reveal.reveal-zoom {
+  transform: translateY(44px) scale(0.88) rotate(var(--reveal-spin, -5deg));
+}
+/* Trôi vào từ hai bên — dùng cho các cặp phần tử đứng song song */
+.reveal.reveal-left {
+  transform: translateX(-38px);
+}
+.reveal.reveal-right {
+  transform: translateX(38px);
+}
+
+.reveal[data-shown="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+/*
+ * Lớp kem phủ mặt ảnh, tan dần khi ảnh hiện ra — giống tấm phim polaroid đang
+ * rửa. Tan chậm hơn cú fade của khung (0.7s) để khách kịp thấy: khung đã rõ
+ * rồi mà mặt ảnh vẫn đang lên màu.
+ *
+ * Đặt ở pseudo-element của .photo-sheen chứ không phải `filter` trên <img>:
+ * file này nằm ngoài @layer, khai `transition` lên <img> sẽ đè mất
+ * `transition-transform` của Tailwind và làm hiệu ứng rê chuột giật cục.
+ */
+.photo-sheen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(170deg, var(--color-cream) 0%, var(--color-blush-light) 100%);
+  opacity: 0;
+  transition: opacity 1.6s ease-out var(--reveal-delay, 0ms);
+}
+.reveal:not([data-shown]) .photo-sheen::before {
+  opacity: 1;
+}
+
+/*
+ * Vệt sáng lướt ngang mặt ảnh — giả ánh sáng phản trên tấm ảnh in.
+ *
+ * Chạy hai lúc: khi khách cuộn tới ảnh (mọi máy, một lần — xem @keyframes bên
+ * dưới) và khi rê chuột (chỉ máy có chuột). Bản cuộn tới dùng `animation` chứ
+ * không dùng `transition`: hết animation thì vệt sáng tự về lại mép trái, nên
+ * lần rê chuột sau vẫn còn vệt sáng để quét. Nếu dùng transition, vệt sáng nằm
+ * lại ở mép phải và hover sau đó không thấy gì.
+ */
+.photo-sheen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 38%,
+    rgba(255, 255, 255, 0.5) 50%,
+    transparent 62%
+  );
+  translate: -130% 0;
+}
+
+@keyframes photo-sheen-sweep {
+  from { translate: -130% 0; }
+  to { translate: 130% 0; }
+}
+
+.reveal[data-shown="true"] .photo-sheen::after {
+  animation: photo-sheen-sweep 1.2s cubic-bezier(0.3, 0.6, 0.3, 1)
+    calc(var(--reveal-delay, 0ms) + 420ms) 1 backwards;
+}
+
+@media (hover: hover) {
+  .group:hover .photo-sheen::after {
+    translate: 130% 0;
+    transition: translate 0.9s ease-out;
+  }
+}
+
+/*
+ * Ken Burns: ảnh nào đang nằm trong màn hình thì tự zoom và trôi chậm.
+ * `data-inview` do useReveal bật/tắt theo vị trí cuộn — không phụ thuộc chuột,
+ * nên điện thoại cũng thấy y hệt máy tính.
+ *
+ * `linear` chứ không phải ease: khách vuốt qua rất nhanh, ease-in-out 7s đo
+ * được mới 0.1% sau 0.8s — coi như đứng yên. Linear thì lúc nào cũng nhúc nhích
+ * đều, đúng kiểu máy quay lia chậm.
+ *
+ * Animation chạy trên `transform` chứ không phải `scale`: Tailwind v4 ghi
+ * `hover:scale-*` vào property `scale`, để riêng hai property thì hiệu ứng nền
+ * và zoom khi rê chuột cộng dồn thay vì cái này nuốt cái kia.
+ *
+ * `--kb-*` do useReveal rải theo thứ tự ảnh trong trang: mỗi tấm zoom về một
+ * hướng, lệch pha nhau, nên cả lưới ảnh không cùng phồng lên một nhịp.
+ */
+@keyframes photo-ken-burns {
+  from { transform: scale(1) translate3d(0, 0, 0); }
+  to { transform: scale(1.13) translate3d(var(--kb-x, 0%), var(--kb-y, -2%), 0); }
+}
+
+.photo-sheen[data-inview="true"] img {
+  animation: photo-ken-burns 7s linear var(--kb-delay, 0s) infinite alternate;
+}
+
+/* Cormorant mặc định dùng số kiểu cổ, số 1 dễ đọc nhầm thành chữ I */
+.lnum {
+  font-feature-settings: "lnum" 1;
+  font-variant-numeric: lining-nums;
+}
+
+/*
+ * Đường kẻ mảnh có trái tim ở giữa.
+ *
+ * Nằm trong một khối `.reveal` chưa hiện thì hai vạch co về sát trái tim, rồi
+ * mới kéo dài ra hai bên — tiêu đề section tự vẽ chính nó ra. Dùng property
+ * `scale` chứ không phải `width`: kéo width làm trình duyệt tính lại bố cục
+ * mỗi khung hình.
+ */
+.divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  color: var(--color-blush-dark);
+}
+.divider::before,
+.divider::after {
+  content: "";
+  height: 1px;
+  width: 3rem;
+  background: currentColor;
+  transition: scale 1s cubic-bezier(0.19, 1, 0.22, 1) calc(var(--reveal-delay, 0ms) + 200ms);
+}
+.divider::before { transform-origin: right center; }
+.divider::after { transform-origin: left center; }
+
+.reveal:not([data-shown]) .divider::before,
+.reveal:not([data-shown]) .divider::after {
+  scale: 0 1;
+}
+
+/*
+ * Mặt giấy của các tấm thiệp lớn: sáng ở mép trên rồi đậm dần xuống chân,
+ * thay cho một mảng hồng phẳng. Viền và khung chỉ chìm đặt ở phía HTML, đây
+ * chỉ lo phần nền.
+ */
+.card-paper {
+  background-image: radial-gradient(
+    130% 95% at 50% 0%,
+    var(--color-cream) 0%,
+    var(--color-blush-light) 55%,
+    #f6dbe1 100%
+  );
+}
+
+/*
+ * Tên lễ (VU QUY / TÂN HÔN): mặt chữ là một dải chuyển màu, và dải đó trượt
+ * ngang một lần khi tấm thiệp hiện ra — như ánh sáng lướt trên chữ dập nổi.
+ *
+ * `background-clip: text` nên chữ phải trong suốt; đây vẫn là text thật, khách
+ * bôi đen được và trình đọc màn hình vẫn đọc được.
+ *
+ * Hai đầu dải cố tình không quá nhạt: chữ to nhưng nét Cormorant rất mảnh, màu
+ * sáng hơn nữa là rơi xuống dưới ngưỡng tương phản đọc được trên nền kem.
+ */
+.gilt {
+  display: inline-block;
+  background-image: linear-gradient(
+    100deg,
+    #b96f7e 0%,
+    var(--color-wine) 34%,
+    #7b3945 50%,
+    var(--color-wine) 66%,
+    #b96f7e 100%
+  );
+  background-size: 260% 100%;
+  background-position: 88% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@keyframes gilt-sweep {
+  from { background-position: 88% 0; }
+  to { background-position: 12% 0; }
+}
+
+.reveal[data-shown="true"] .gilt {
+  animation: gilt-sweep 2.4s cubic-bezier(0.25, 0.7, 0.3, 1)
+    calc(var(--reveal-delay, 0ms) + 300ms) 1 both;
+}
+
+/*
+ * Vòng tròn quanh chữ "&" giữa tên cô dâu chú rể: nét tròn tự vẽ một vòng khi
+ * tấm thiệp hiện ra, cùng nhịp với hai vạch của .divider — cả tấm thiệp như
+ * đang được kẻ tay chứ không bật lên sẵn.
+ *
+ * 189 là chu vi đường tròn r=30 trong viewBox 64. Xoay -90deg để nét bắt đầu
+ * từ đỉnh vòng tròn.
+ */
+.amp-ring circle {
+  stroke-dasharray: 189;
+  stroke-dashoffset: 0;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+  transition: stroke-dashoffset 1.5s cubic-bezier(0.19, 1, 0.22, 1)
+    calc(var(--reveal-delay, 0ms) + 320ms);
+}
+
+.reveal:not([data-shown]) .amp-ring circle {
+  stroke-dashoffset: 189;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .reveal,
+  .reveal[class*="reveal-"] { opacity: 1; transform: none; transition: none; }
+  .photo-sheen::before,
+  .photo-sheen::after { display: none; }
+  .reveal:not([data-shown]) .divider::before,
+  .reveal:not([data-shown]) .divider::after { scale: none; }
+  .reveal:not([data-shown]) .amp-ring circle { stroke-dashoffset: 0; }
+  .photo-sheen[data-inview="true"] img { animation: none; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }
