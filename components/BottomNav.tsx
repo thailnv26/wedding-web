@@ -2,11 +2,15 @@
 
 import { useActiveSection } from "@/lib/useActiveSection";
 
+/**
+ * Năm mục, không hơn. Thêm mục thứ sáu là nhãn "Chuyện tình" xuống dòng trên
+ * máy màn hẹp (Galaxy A55 và các máy ~360px) — album vì vậy nằm chung section
+ * với chuyện tình thay vì có nút riêng.
+ */
 const ITEMS = [
   { id: "ngay-cuoi", label: "Ngày cưới", icon: IconCalendar },
   { id: "thong-tin", label: "Thông tin", icon: IconRings },
   { id: "chuyen-tinh", label: "Chuyện tình", icon: IconHeart },
-  { id: "album", label: "Album", icon: IconPhoto },
   { id: "rsvp", label: "RSVP", icon: IconEnvelope },
   { id: "mung-cuoi", label: "Mừng cưới", icon: IconGift },
 ];
@@ -38,7 +42,9 @@ export function BottomNav({ visible }: { visible: boolean }) {
                 }`}
               >
                 <Icon />
-                <span className="text-[0.52rem] leading-none tracking-[0.06em]">{label}</span>
+                <span className="text-[0.55rem] leading-none tracking-[0.04em] whitespace-nowrap">
+                  {label}
+                </span>
               </a>
             </li>
           );
@@ -88,15 +94,6 @@ function IconEnvelope() {
     <svg {...iconProps}>
       <rect x="3" y="5" width="18" height="14" rx="2" />
       <path d="m3 7 9 6 9-6" />
-    </svg>
-  );
-}
-function IconPhoto() {
-  return (
-    <svg {...iconProps}>
-      <rect x="3" y="4" width="18" height="16" rx="2" />
-      <circle cx="9" cy="10" r="1.6" />
-      <path d="m4 18 5-5 4 4 3-3 4 4" />
     </svg>
   );
 }

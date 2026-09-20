@@ -7,7 +7,6 @@ import { Countdown } from "@/components/Countdown";
 import { Details } from "@/components/Details";
 import { Gate } from "@/components/Gate";
 import { Footer } from "@/components/Footer";
-import { Gallery } from "@/components/Gallery";
 import { Gift } from "@/components/Gift";
 import { Hero } from "@/components/Hero";
 import { MusicPlayer } from "@/components/MusicPlayer";
@@ -60,7 +59,6 @@ export function Invitation({ sideKey }: { sideKey: SideKey }) {
           <Countdown side={side} />
           <Details side={side} guestName={guestName} />
           <OurStory />
-          <Gallery />
           <Rsvp side={side} guestName={guestName} />
           <Gift />
           <Footer side={side} />

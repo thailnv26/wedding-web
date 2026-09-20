@@ -23,9 +23,14 @@ export function Gallery() {
   const openViewer = usePhotoViewer();
 
   return (
-    // .reveal nằm ở từng tấm ảnh chứ không ở section, để ảnh hiện lần lượt khi
+    // .reveal nằm ở từng tấm ảnh chứ không ở khối bọc, để ảnh hiện lần lượt khi
     // khách cuộn tới.
-    <section id="album" className="px-6 py-12">
+    //
+    // Không còn là section riêng có id="album": album nằm gọn trong "Chuyện
+    // tình" (xem OurStory.tsx) để thanh nav dưới màn hình bớt được một nút —
+    // sáu nút thì nhãn "Chuyện tình" bị xuống dòng trên máy màn hẹp.
+    // Padding ngang do section cha lo, ở đây chỉ cần khoảng cách phía trên.
+    <div className="mt-14">
       <SectionHeading
         overline="Một vài khoảnh khắc"
         script="Album"
@@ -84,6 +89,6 @@ export function Gallery() {
           </button>
         </div>
       ) : null}
-    </section>
+    </div>
   );
 }

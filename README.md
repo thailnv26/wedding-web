@@ -294,12 +294,12 @@ components/
   WaxSeal.tsx        dấu niêm phong sáp có chữ lồng
   Hero.tsx           tên cô dâu chú rể
   Countdown.tsx      tấm thiệp hình vòm + đồng hồ đếm ngược
-  OurStory.tsx       chuyện chúng mình
+  OurStory.tsx       chuyện chúng mình (ôm luôn album ảnh bên dưới)
   Details.tsx        hai họ + báo tin lễ + hôn lễ + lời mời dự tiệc
-  Gallery.tsx        album ảnh + xem phóng to
+  Gallery.tsx        album ảnh + xem phóng to — nằm trong OurStory, không phải section riêng
   Rsvp.tsx           form xác nhận + sổ lưu bút
   Gift.tsx           hộp mừng cưới, popup mã QR
-  BottomNav.tsx      thanh điều hướng dưới màn hình
+  BottomNav.tsx      thanh điều hướng dưới màn hình (5 mục — thêm nữa là nhãn xuống dòng)
   MusicPlayer.tsx    nhạc nền
 data/config.ts       ★ toàn bộ nội dung thiệp, gồm cả hai phiên bản
 data/album.ts        danh sách ảnh album — script tự sinh, đừng sửa tay

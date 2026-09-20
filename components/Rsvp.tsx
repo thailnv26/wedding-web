@@ -74,13 +74,6 @@ export function Rsvp({ side, guestName }: { side: ResolvedSide; guestName: strin
               ? "Tụi mình đã ghi nhận, hẹn gặp bạn trong ngày vui nhé."
               : "Tiếc là chưa gặp được bạn dịp này, nhưng tụi mình rất trân trọng lời chúc của bạn."}
           </p>
-          <button
-            type="button"
-            onClick={() => setStatus("idle")}
-            className="mt-5 text-[0.6rem] tracking-[0.25em] text-wine uppercase underline underline-offset-4"
-          >
-            Gửi thêm lời chúc
-          </button>
         </div>
       ) : (
         <form onSubmit={onSubmit} className="mx-auto mt-8 max-w-[380px] space-y-5">

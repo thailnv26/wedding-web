@@ -1,4 +1,5 @@
 import { config } from "@/data/config";
+import { Gallery } from "./Gallery";
 import { Polaroid } from "./Polaroid";
 import { SectionHeading } from "./SectionHeading";
 import { Blossom } from "./Blossom";
@@ -45,7 +46,11 @@ export function OurStory() {
         ))}
       </div>
 
-      <p className="reveal mt-8 text-center font-script text-2xl text-seal">{config.couple.hashtag}</p>
+      {/* Album ảnh cưới nằm luôn trong section này — không tách ra thành mục
+          riêng nữa, nên thanh nav còn năm nút. */}
+      <Gallery />
+
+      <p className="reveal mt-12 text-center font-script text-2xl text-seal">{config.couple.hashtag}</p>
     </section>
   );
 }
