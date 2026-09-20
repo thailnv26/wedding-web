@@ -72,14 +72,6 @@ export type Side = {
   events: WeddingEvent[];
   /** Buổi mà khách được mời: dùng cho đồng hồ đếm ngược và tấm thiệp hình vòm. */
   mainEventId: string;
-  /** Mừng cưới: mỗi bên một tài khoản. */
-  gift: {
-    qrImage: string;
-    bankName: string;
-    accountName: string;
-    accountNumber: string;
-    note: string;
-  };
 };
 
 /* ---------------- Hai bên gia đình ---------------- */
@@ -129,14 +121,6 @@ const nhaGai: Side = {
     },
   ],
   mainEventId: "tiec-nha-gai",
-  gift: {
-    // QR VietQR tĩnh sinh từ BIN ACB (970416) + số tài khoản, kèm sẵn nội dung chuyển khoản.
-    qrImage: "/images/qr-nha-gai.svg",
-    bankName: "ACB",
-    accountName: "LE NGOC MINH",
-    accountNumber: "2181867",
-    note: "Mung cuoi Thai Minh",
-  },
 };
 
 /* ---------------- Thiệp nhà trai — lễ TÂN HÔN ---------------- */
@@ -173,14 +157,6 @@ const nhaTrai: Side = {
     },
   ],
   mainEventId: "tiec-nha-trai",
-  gift: {
-    // TODO: thay QR + số tài khoản thật của chú rể.
-    qrImage: "/images/qr.svg",
-    bankName: "Vietcombank",
-    accountName: "LU NGOC VINH THAI",
-    accountNumber: "0000000000",
-    note: "Mung cuoi Thai Minh",
-  },
 };
 
 export const config = {
@@ -190,10 +166,26 @@ export const config = {
     title: "Thiệp cưới Vĩnh Thái & Ngọc Minh",
     description:
       "Trân trọng kính mời bạn đến chung vui trong ngày hạnh phúc của chúng mình.",
-    /** Domain sau khi deploy, dùng để sinh link mời trong trang /tao-link */
-    baseUrl: "https://thiep-cuoi-cua-ban.vercel.app",
-    /** Ảnh preview khi share link (đặt trong public/images/) */
+    /** Tên "trang" hiện mờ phía trên khung preview, ví dụ trên Messenger. */
+    siteName: "Vĩnh Thái & Ngọc Minh",
+    /**
+     * Domain THẬT sau khi deploy. Dùng để sinh link mời trong /tao-link, và để
+     * đổi đường dẫn ảnh preview thành link tuyệt đối.
+     *
+     * ⚠️ Zalo/Messenger chỉ tải được ảnh preview qua link tuyệt đối. Để sai domain
+     * ở đây là dán link đi không ra ảnh. Sửa ngay sau khi deploy xong.
+     */
+    baseUrl: "https://wedding-web-zeta-nine.vercel.app",
+    /**
+     * Ảnh hiện trong khung preview khi dán link. File do `npm run anh` cắt sẵn
+     * đúng 1200x630 (khung `og` trong scripts/optimize-photos.mjs) — đổi ảnh thì
+     * nhớ sửa cả số đo bên dưới, các app chat đọc số này để chừa chỗ trước khi
+     * ảnh tải xong.
+     */
     ogImage: "/images/og-cover.jpg",
+    ogImageWidth: 1200,
+    ogImageHeight: 630,
+    ogImageAlt: "Vĩnh Thái & Ngọc Minh trong ngày cưới",
   },
 
   /** Phiên bản dùng khi khách mở thẳng tên miền, không qua link mời. */
@@ -270,10 +262,17 @@ export const config = {
   },
 
   /* ---------------- Mừng cưới ---------------- */
+  /** Hai nhà dùng chung một tài khoản, nên thiệp bên nào cũng hiện đúng mã QR này. */
   gift: {
     heading: "Hộp Mừng Cưới",
     message:
       "Sự có mặt của bạn đã là món quà lớn nhất. Nếu muốn gửi thêm lời chúc bằng một chút tấm lòng, chúng mình xin trân trọng đón nhận.",
+    /** QR VietQR tĩnh, sinh từ BIN ACB (970416) + số tài khoản, kèm sẵn nội dung chuyển khoản. */
+    qrImage: "/images/qr.svg",
+    bankName: "ACB",
+    accountName: "LE NGOC MINH",
+    accountNumber: "2181867",
+    note: "Mung cuoi Thai Minh",
   },
 
   /* ---------------- RSVP ---------------- */

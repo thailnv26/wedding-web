@@ -13,6 +13,7 @@ import { Hero } from "@/components/Hero";
 import { MusicPlayer } from "@/components/MusicPlayer";
 import { OurStory } from "@/components/OurStory";
 import { Petals } from "@/components/Petals";
+import { PhotoViewerProvider } from "@/components/PhotoViewer";
 import { Rsvp } from "@/components/Rsvp";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { useGuestName } from "@/lib/guest";
@@ -50,16 +51,21 @@ export function Invitation({ sideKey }: { sideKey: SideKey }) {
       <MusicPlayer start={opened} />
       <Gate side={side} guestName={guestName} onOpen={handleOpen} />
 
-      <main className="relative mx-auto max-w-[480px]">
-        <Hero side={side} />
-        <Countdown side={side} />
-        <Details side={side} guestName={guestName} />
-        <OurStory />
-        <Gallery />
-        <Rsvp side={side} guestName={guestName} />
-        <Gift side={side} />
-        <Footer side={side} />
-      </main>
+      {/* Khung xem ảnh phóng to dùng chung cho cả thiệp: bấm vào tấm nào trong
+          trang cũng mở được bản to của nó. Bọc ngoài <main> chứ không nằm trong
+          từng khu vực — xem components/PhotoViewer.tsx. */}
+      <PhotoViewerProvider>
+        <main className="relative mx-auto max-w-[480px]">
+          <Hero side={side} />
+          <Countdown side={side} />
+          <Details side={side} guestName={guestName} />
+          <OurStory />
+          <Gallery />
+          <Rsvp side={side} guestName={guestName} />
+          <Gift />
+          <Footer side={side} />
+        </main>
+      </PhotoViewerProvider>
 
       <ScrollToTop visible={opened} />
       <BottomNav visible={opened} />

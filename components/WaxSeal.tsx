@@ -1,20 +1,34 @@
-/** Con dấu sáp tròn có chữ lồng ở giữa. */
-export function WaxSeal({ text, size = 64 }: { text: string; size?: number }) {
+import Image from "next/image";
+
+/**
+ * Con dấu sáp của cô dâu chú rể — ảnh chụp cục sáp thật in chữ lồng "T&M",
+ * sinh ra từ `npm run icon` (xem scripts/make-favicon.mjs).
+ *
+ * `text` là chữ lồng của bên thiệp đang mở, dùng làm lời thay ảnh cho trình đọc
+ * màn hình. Ảnh chỉ có một bản T&M nên chữ lồng không đổi theo bên thiệp: dấu sáp
+ * là dấu chung của hai người, không phải dấu riêng từng nhà.
+ *
+ * Ảnh đã có sẵn nền trong suốt và viền sáp lượn sóng, nên không bo tròn, không tô nền.
+ */
+export function WaxSeal({
+  text,
+  size = 64,
+  priority = false,
+}: {
+  text: string;
+  size?: number;
+  /** Bật cho dấu sáp hiện ngay màn đầu (cổng hoa) để trình duyệt tải ảnh sớm. */
+  priority?: boolean;
+}) {
   return (
-    <div
-      className="flex items-center justify-center rounded-full text-cream shadow-[0_6px_14px_-4px_rgba(120,45,55,0.6)]"
-      style={{
-        width: size,
-        height: size,
-        background: "radial-gradient(circle at 34% 28%, #d1808b 0%, #b75e6a 45%, #97434f 100%)",
-      }}
-    >
-      <span
-        className="font-display tracking-wide"
-        style={{ fontSize: size * 0.3, lineHeight: 1 }}
-      >
-        {text}
-      </span>
-    </div>
+    <Image
+      src="/images/badge.png"
+      alt={`Dấu sáp ${text}`}
+      width={size}
+      height={size}
+      priority={priority}
+      draggable={false}
+      className="select-none drop-shadow-[0_6px_14px_rgba(120,45,55,0.45)]"
+    />
   );
 }

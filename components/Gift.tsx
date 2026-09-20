@@ -3,14 +3,13 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { config } from "@/data/config";
-import type { ResolvedSide } from "@/lib/side";
 import { SectionHeading } from "./SectionHeading";
 
-/** Mỗi bên thiệp dẫn về tài khoản của nhà mình. */
-export function Gift({ side }: { side: ResolvedSide }) {
+/** Hai nhà dùng chung một tài khoản, nên thiệp bên nào cũng hiện đúng mã QR này. */
+export function Gift() {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
-  const gift = { ...config.gift, ...side.gift };
+  const gift = config.gift;
 
   useEffect(() => {
     if (!open) return;

@@ -114,7 +114,7 @@ export function Gate({ side, guestName, onOpen }: Props) {
               opening ? "scale-150 opacity-0" : "animate-pulse-soft opacity-100"
             }`}
           >
-            <WaxSeal text={side.monogram} size={58} />
+            <WaxSeal text={side.monogram} size={58} priority />
           </div>
 
           {/* hoa leo trên đỉnh cổng */}

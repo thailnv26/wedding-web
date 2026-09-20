@@ -39,17 +39,17 @@ Không cần đụng vào code giao diện.
 
 | Mục trong file | Sửa cái gì |
 | --- | --- |
-| `site` | Tiêu đề, mô tả, domain sau khi deploy |
+| `site` | Tiêu đề, mô tả, domain sau khi deploy, ảnh preview khi gửi link |
 | `defaultSide` | Phiên bản hiện khi khách vào thẳng tên miền |
 | `couple` | Hashtag chung |
 | `groom` / `bride` | Tên, vai, thứ bậc (Trưởng nữ / Quý nam), ảnh, lời giới thiệu |
 | `groomFamily` / `brideFamily` | Ông, bà và địa chỉ mỗi bên |
-| `sides["nha-gai"]` | Riêng thiệp nhà gái: tên lễ, chữ lồng, lịch lễ + tiệc, tài khoản mừng cưới |
+| `sides["nha-gai"]` | Riêng thiệp nhà gái: tên lễ, chữ lồng, lịch lễ + tiệc |
 | `sides["nha-trai"]` | Riêng thiệp nhà trai, cùng cấu trúc như trên |
 | `story` | Chuyện tình, ảnh kỷ niệm |
 | `gallery` | Album ảnh |
 | `music` | Đường dẫn file nhạc, âm lượng |
-| `gift` | Tiêu đề + lời dẫn hộp mừng cưới (QR và số tài khoản nằm trong từng `sides`) |
+| `gift` | Hộp mừng cưới: lời dẫn, mã QR, số tài khoản — hai nhà dùng chung một tài khoản |
 | `rsvp` | Lời mời xác nhận, hạn chót, link Google Apps Script |
 | `contact` | Số điện thoại cô dâu chú rể |
 
@@ -184,32 +184,87 @@ tắt bằng `rsvp.showWishes: false`.
 
 ## 7. Mã QR mừng cưới
 
-Mỗi bên thiệp dẫn về tài khoản của nhà mình, nên có **hai khối `gift`** — một trong
-`sides["nha-gai"]`, một trong `sides["nha-trai"]`. Số tài khoản hiện là `0000000000`,
-nhớ thay trước khi gửi thiệp.
+Hai nhà dùng **chung một tài khoản**, nên chỉ có **một khối `gift`** duy nhất ở cấp
+ngoài cùng của `data/config.ts`. Thiệp nhà gái hay nhà trai đều hiện đúng mã QR đó.
 
-Mở app ngân hàng → tạo mã QR (nên kèm sẵn nội dung chuyển khoản) → chụp hoặc tải ảnh
-về, lưu thành `public/images/qr-co-dau.png` / `qr-chu-re.png`, rồi sửa trong
-`data/config.ts`:
+Đang dùng tài khoản ACB của cô dâu, mã QR là `public/images/qr.svg` — QR VietQR tĩnh
+đã kèm sẵn nội dung chuyển khoản. Muốn đổi sang tài khoản khác: mở app ngân hàng →
+tạo mã QR (nên kèm sẵn nội dung chuyển khoản) → lưu ảnh vào `public/images/`, rồi sửa:
 
 ```ts
-sides: {
-  "nha-gai": {
-    gift: {
-      qrImage: "/images/qr-co-dau.png",
-      bankName: "Vietcombank",
-      accountName: "LE NGOC MINH",
-      accountNumber: "1234567890",
-      note: "Mung cuoi Thai Minh",
-    },
-  },
+gift: {
+  heading: "Hộp Mừng Cưới",
+  message: "...",
+  qrImage: "/images/qr.svg",
+  bankName: "ACB",
+  accountName: "LE NGOC MINH",
+  accountNumber: "2181867",
+  note: "Mung cuoi Thai Minh",
 },
 ```
 
 Khách chạm vào thẻ "Hộp Mừng Cưới" là hiện popup nhỏ có mã QR, tên chủ tài khoản và
 nút sao chép số tài khoản.
 
-## 8. Deploy
+> Sau này nếu muốn tách lại mỗi nhà một tài khoản thì chuyển khối `gift` này vào trong
+> từng `sides[...]` và cho `Gift.tsx` đọc theo bên đang mở.
+
+## 8. Icon "TM" và ảnh preview khi gửi link
+
+### Icon trên tab trình duyệt
+
+Chữ lồng **T & M** nằm trên nền dấu niêm phong sáp, có sẵn ở ba file trong `app/`:
+
+| File | Dùng ở đâu |
+| --- | --- |
+| `app/icon.svg` | Tab trình duyệt trên máy tính và điện thoại |
+| `app/apple-icon.png` | Khi khách bấm "Thêm vào màn hình chính" trên iPhone |
+| `app/favicon.ico` | Trình duyệt cũ — gói sẵn ba cỡ 16 / 32 / 48 |
+
+Next tự nhặt ba file này và chèn thẻ `<link>` vào `<head>`, **không phải khai báo
+thêm ở đâu cả**. Ba file đã commit sẵn, chạy và deploy không cần làm gì thêm.
+
+Muốn đổi hai chữ cái hoặc đổi màu thì sửa `scripts/make-favicon.mjs` rồi chạy:
+
+```bash
+npm run icon
+```
+
+Hai chữ cái vẽ bằng nét vector chứ không dùng font, nên icon ra giống hệt nhau trên
+mọi máy. Toạ độ nằm trong khung 64×64, tâm ở (32, 32) — xem `MONOGRAM` trong script.
+
+### Ảnh hiện ra khi copy link gửi đi
+
+Khi khách dán link thiệp vào Zalo, Messenger, Facebook hay iMessage, các app đó đọc
+thẻ Open Graph trong `<head>` để dựng khung preview: ảnh cưới, tiêu đề, một dòng mô tả.
+
+Toàn bộ thẻ đó sinh từ một chỗ duy nhất — [`lib/metadata.ts`](lib/metadata.ts) — nên
+trang nào cũng có đủ, không trang nào bị sót. Mỗi phiên bản thiệp có tiêu đề riêng:
+
+- `/nha-gai/` → "Lễ Vu Quy · Ngọc Minh & Vĩnh Thái"
+- `/nha-trai/` → "Lễ Tân Hôn · Vĩnh Thái & Ngọc Minh"
+
+Ảnh preview thì hai bên dùng chung một tấm: `site.ogImage` trong `data/config.ts`,
+mặc định là `public/images/og-cover.jpg` — do `npm run anh` cắt sẵn đúng 1200×630.
+Đổi ảnh khác thì nhớ sửa luôn `ogImageWidth` / `ogImageHeight` cho khớp.
+
+> ⚠️ **Bắt buộc**: sửa `site.baseUrl` thành domain thật sau khi deploy. Các app chat
+> chỉ tải được ảnh preview qua link tuyệt đối — để sai domain là dán link đi ra khung
+> trống, không có ảnh.
+
+### Thử xem preview ra đúng chưa
+
+Dán link vào [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/)
+rồi bấm **Scrape Again** — xem được ngay ảnh, tiêu đề, mô tả.
+
+Các app chat nhớ (cache) kết quả lần đầu khá lâu. Đã deploy bản mới mà preview vẫn
+hiện cái cũ thì thêm tham số vào cuối link cho nó coi là link lạ:
+
+```
+https://domain-that.com/nha-trai/?v=2
+```
+
+## 9. Deploy
 
 ```bash
 npm run build      # kết quả nằm trong thư mục out/
@@ -222,11 +277,14 @@ npm run build      # kết quả nằm trong thư mục out/
 Deploy xong nhớ sửa `site.baseUrl` trong `data/config.ts` thành domain thật, vì trang
 `/tao-link` lấy giá trị đó để sinh link mời.
 
-## 9. Cấu trúc thư mục
+## 10. Cấu trúc thư mục
 
 ```
 app/
   page.tsx           / -> thiệp phiên bản mặc định
+  icon.svg           icon tab trình duyệt (chữ lồng TM)
+  apple-icon.png     icon khi lưu ra màn hình chính iPhone
+  favicon.ico        icon cho trình duyệt cũ
   [ben]/page.tsx     /nha-gai/ và /nha-trai/
   tao-link/          trang nội bộ sinh link mời
   globals.css        bảng màu, font, hiệu ứng
@@ -246,7 +304,9 @@ components/
 data/config.ts       ★ toàn bộ nội dung thiệp, gồm cả hai phiên bản
 data/album.ts        danh sách ảnh album — script tự sinh, đừng sửa tay
 lib/side.ts          gom mọi khác biệt giữa thiệp nhà gái và nhà trai
+lib/metadata.ts      thẻ preview khi dán link vào Zalo / Messenger / Facebook
 photos-goc/          ảnh gốc từ thợ chụp — chỉ cần khi đổi ảnh, không có sẵn trong repo
 scripts/optimize-photos.mjs  cắt + nén ảnh -> public/images/  (npm run anh)
 scripts/apps-script.gs       code dán vào Google Apps Script
+scripts/make-favicon.mjs     vẽ lại bộ icon chữ lồng TM  (npm run icon)
 ```

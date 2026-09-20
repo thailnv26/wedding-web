@@ -1,5 +1,7 @@
+import type { Metadata } from "next";
 import { config, type Family, type Person, type Side, type SideKey, type WeddingEvent } from "@/data/config";
 import { splitDate } from "./date";
+import { pageMetadata } from "./metadata";
 
 /** Thứ tự này cũng là thứ tự route được sinh ra lúc build. */
 export const SIDE_KEYS = ["nha-gai", "nha-trai"] as const;
@@ -65,13 +67,18 @@ export function resolveSide(key: SideKey): ResolvedSide {
   };
 }
 
-/** Tiêu đề + mô tả riêng cho từng phiên bản, dùng cho tab trình duyệt và preview Zalo. */
-export function sideMetadata(key: SideKey) {
+/**
+ * Thẻ <title> + thẻ preview riêng cho từng phiên bản thiệp: khách nhà gái dán link
+ * đi thì hiện "Lễ Vu Quy", khách nhà trai hiện "Lễ Tân Hôn". Ảnh preview thì hai
+ * bên dùng chung một tấm.
+ */
+export function sideMetadata(key: SideKey): Metadata {
   const side = resolveSide(key);
-  return {
+  return pageMetadata({
     title: `Lễ ${titleCase(side.ceremony)} · ${side.headline[0]} & ${side.headline[1]}`,
     description: `${side.hostFamily.label} trân trọng kính mời bạn đến dự ${side.mainEvent.venue} ngày ${side.dateLine}.`,
-  };
+    path: `/${key}/`,
+  });
 }
 
 /** "VU QUY" -> "Vu Quy" */

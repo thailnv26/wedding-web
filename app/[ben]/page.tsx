@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Invitation } from "@/components/Invitation";
-import { config } from "@/data/config";
 import { SIDE_KEYS, isSideKey, sideMetadata } from "@/lib/side";
 
 type Props = { params: Promise<{ ben: string }> };
@@ -15,20 +14,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { ben } = await params;
-  if (!isSideKey(ben)) return {};
-
-  const { title, description } = sideMetadata(ben);
-  return {
-    title,
-    description,
-    openGraph: {
-      title,
-      description,
-      type: "website",
-      locale: "vi_VN",
-      images: [{ url: config.site.ogImage }],
-    },
-  };
+  return isSideKey(ben) ? sideMetadata(ben) : {};
 }
 
 export default async function Page({ params }: Props) {
