@@ -108,6 +108,8 @@ const nhaGai: Side = {
       lunarLabel: "Nhằm ngày 21 tháng 10 năm Bính Ngọ",
       venue: "Tư gia",
       address: "Ấp Phú Phong, xã Tiên Thủy, tỉnh Vĩnh Long",
+      /** Ghim tư gia nhà gái: 10°17'36.8"N 106°14'31.2"E */
+      mapUrl: "https://www.google.com/maps/search/?api=1&query=10.293546,106.242008",
     },
     {
       id: "tiec-nha-gai",
@@ -117,6 +119,8 @@ const nhaGai: Side = {
       lunarLabel: "Nhằm ngày 20 tháng 10 năm Bính Ngọ",
       venue: "Tư gia",
       address: "Ấp Phú Phong, xã Tiên Thủy, tỉnh Vĩnh Long",
+      /** Ghim tư gia nhà gái: 10°17'36.8"N 106°14'31.2"E */
+      mapUrl: "https://www.google.com/maps/search/?api=1&query=10.293546,106.242008",
       note: "Rất mong được gặp bạn!",
     },
   ],
