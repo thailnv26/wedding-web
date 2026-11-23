@@ -253,8 +253,8 @@ export const config = {
 
   /* ---------------- Nhạc nền ---------------- */
   music: {
-    /** Đặt file mp3 vào public/audio/ rồi sửa đường dẫn này */
-    src: "/audio/nhac-nen.mp3",
+    /** Đặt file nhạc (mp3/m4a) vào public/audio/ rồi sửa đường dẫn này */
+    src: "/audio/nhac-nen.m4a",
     title: "Nhạc nền",
     /** Tự phát ngay khi khách mở phong bì (đây là thao tác chạm nên trình duyệt cho phép) */
     autoPlayOnOpen: true,
